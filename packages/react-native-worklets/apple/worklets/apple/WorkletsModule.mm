@@ -23,6 +23,19 @@
 
 using namespace worklets;
 
+namespace {
+
+/// Returns the URL of the dedicated Worklet Runtime bundle when it is bundled
+/// with the app, or `nil` to fall back to the app bundle. The Worklet Runtime
+/// only needs the worklet modules, so loading a minimal bundle avoids
+/// re-evaluating the whole app bundle on startup.
+NSURL *resolveWorkletsBundleURL()
+{
+  return [[NSBundle mainBundle] URLForResource:@"worklets.ios" withExtension:@"bundle"];
+}
+
+} // namespace
+
 @interface RCTBridge (JSIRuntime)
 - (void *)runtime;
 @end
@@ -66,7 +79,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(installTurboModule : (BOOL)bundleModeEnab
   std::shared_ptr<const ScriptBuffer> script = nullptr;
 
   if (bundleModeEnabled) {
-    NSURL *url = bundleManager_.bundleURL;
+    NSURL *url = resolveWorkletsBundleURL() ?: bundleManager_.bundleURL;
     script = getScript(url);
     sourceURL = [[url absoluteString] UTF8String];
   }
