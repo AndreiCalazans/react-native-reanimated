@@ -67,9 +67,10 @@ class WorkletsModule(
         val jsContext = checkNotNull(context.javaScriptContextHolder).get()
         val jsCallInvokerHolder = context.jsCallInvokerHolder as CallInvokerHolderImpl
 
+        val workletsBundleUri = resolveWorkletsBundleUri(context)
         val scriptBufferWrapper: ScriptBufferWrapper? =
             if (bundleModeEnabled) {
-                ScriptBufferWrapper(context.sourceURL, context)
+                ScriptBufferWrapper(workletsBundleUri ?: context.sourceURL, context)
             } else {
                 null
             }
@@ -83,6 +84,20 @@ class WorkletsModule(
                 scriptBufferWrapper,
             )
         return true
+    }
+
+    /**
+     * Returns the URI of the dedicated Worklet Runtime bundle when it is bundled
+     * with the app, or `null` to fall back to the app bundle. The Worklet Runtime
+     * only needs the worklet modules, so loading a minimal bundle avoids
+     * re-evaluating the whole app bundle on startup.
+     */
+    private fun resolveWorkletsBundleUri(context: ReactApplicationContext): String? {
+        val assetName = "worklets.android.bundle"
+        return runCatching {
+            context.assets.open(assetName).close()
+            "assets://$assetName"
+        }.getOrNull()
     }
 
     @OptIn(FrameworkAPI::class)

@@ -110,6 +110,7 @@
     "Common",
     "compatibility.json",
     "bundleMode/index.js",
+    "bundleMode/buildWorkletsBundle.js",
     "bundleMode/index.d.ts",
     "bundleMode/shims/*.js",
     "scripts/worklets_utils.rb",
